@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python application
+name: Python CI/CD Pipeline
 
 on:
   push:
@@ -13,27 +13,64 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
+  # --- TRABAJO 1: Verificación de Calidad (CI) ---
+  quality-check:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5 # Actualizado a v5
+        with:
+          python-version: "3.10"
+          cache: 'pip' # Automatización 1: Cache de dependencias para acelerar el build
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest pytest-cov bandit
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Security scan (Bandit)
+        # Automatización 2: Escaneo de vulnerabilidades en el código
+        run: bandit -r . -x ./venv
+
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Test with pytest and Coverage
+        # Automatización 3: Generar reporte de cobertura
+        run: |
+          pytest --cov=./ --cov-report=xml
+
+      - name: Upload coverage reports
+        # Guarda el reporte para auditoría
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: coverage.xml
+
+  # --- TRABAJO 2: Despliegue (CD) ---
+  # deploy:
+  #   needs: quality-check # Solo despliega si los tests pasan
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   environment: production # Permite usar secretos específicos de producción
+    
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Deploy to Server
+  #       run: |
+  #         echo "Conectando al servidor vía SSH..."
+  #         # Aquí iría el comando real, por ejemplo usando rsync o comandos de Docker
+  #         # Ejemplo: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd app && git pull && docker-compose restart"
+  #         echo "Despliegue completado con éxito."
+
+  #     - name: Health Check
+  #       # Automatización 4: Verificar que el sitio esté vivo tras el despliegue
+  #       run: |
+  #         sleep 10
+  #         curl -f http://tusitio.com/health || exit 1
