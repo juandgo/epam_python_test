@@ -1,6 +1,7 @@
 def main() -> None:
     print("Hello from epam-python-exercises!")
 
+
 ### --- EXERCISE 1: Dictionary Class ---
 class Dictionary:
     def __init__(self):
