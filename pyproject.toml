@@ -1,0 +1,25 @@
+[project]
+name = "epam-python-exercises"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "juanda", email = "juandavidgo1997@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+epam-python-exercises = "epam_python_exercises:main"
+
+[build-system]
+requires = ["uv_build>=0.9.21,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.408",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

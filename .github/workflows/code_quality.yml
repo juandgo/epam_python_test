@@ -1,0 +1,59 @@
+name: Python Code Quality
+on: [push]
+
+jobs:
+  lock_file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: uv lock
+
+  # Estos tres ahora corren al mismo tiempo de forma independiente
+  linting:
+    runs-on: ubuntu-latest
+    needs: [lock_file]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: uvx ruff check .
+
+  formatting:
+    runs-on: ubuntu-latest
+    needs: [lock_file]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: uvx ruff format --check .
+
+  type_consistency:
+    runs-on: ubuntu-latest
+    needs: [lock_file]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      # Usamos uvx para que descargue y ejecute pyright de forma aislada
+      - run: uvx pyright .
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: [lock_file]                 # Solo depende del lock para que no se detenga si falla el linter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: uv sync
+      # Instalamos pytest explícitamente para asegurar que exista
+      - run: uv pip install pytest pytest-cov
+      - run: uv run python -m pytest -v --durations=0 --cov --cov-report=xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [linting, formatting, type_consistency, tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: uv build
