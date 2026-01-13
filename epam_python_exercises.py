@@ -60,4 +60,4 @@ word_list2 = ["hello", "view", "mother"]
 
 print(f"Result 1: {nth_char(word_list1)}") # Expected: "yes" (y[0], e[1], s[2])
 print(f"Result 2: {nth_char(word_list2)}") # Expected: "hit" (h[0], i[1], t[2])
-print(nth_char(word_list)) # Output: "yes"
+# print(f"Result 1 (Manual Check): {nth_char(word_list1)}") # Correctly uses word_list1
