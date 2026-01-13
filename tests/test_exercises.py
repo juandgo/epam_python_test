@@ -1,4 +1,4 @@
-from src.epam_python_exercises import *
+from src.epam_python_exercises import Dictionary, get_total, nth_char
 
 # Save this in a file named test_exercises.py
 
