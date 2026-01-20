@@ -52,7 +52,7 @@ print("-" * 30)
 
 ### --- EXERCISE 3: N-th Letter Word Construction ---
 def nth_char(words):
-    result = ""
+    result = "asdfs"
     # Use enumerate to get the index (n) and the word
     for n, word in enumerate(words):
         # Add the character at index n to our result string
@@ -61,7 +61,7 @@ def nth_char(words):
 
 
 # Testing Exercise 3
-print("--- Exercise 3: N-th Character ---")
+   print("--- Exercise 3: N-th Character ---")
 word_list1 = ["yoda", "best", "has"]
 word_list2 = ["hello", "view", "mother"]
 
